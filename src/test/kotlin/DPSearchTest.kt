@@ -1,3 +1,9 @@
+/**
+ * Test for DPSearch class
+ *
+ * @author Yasuaki Yoshii
+ *
+ */
 object DPSearchTest {
     @JvmStatic
     fun main(args: Array<String>) {

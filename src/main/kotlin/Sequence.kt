@@ -1,5 +1,8 @@
 /**
- * sequence
+ * Sequence data
+ *
+ * @author Yasuaki Yoshii
+ *
  * @param name name of sequence
  * @param sequence sequence string
  */

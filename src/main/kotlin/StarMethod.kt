@@ -1,18 +1,30 @@
-import javax.management.QueryEval
-import kotlin.math.max
-
-/** Center Star Method */
+/**
+ * Center Star Method
+ *
+ * @author Yasuaki Yoshii
+ *
+ * @param setOfSeq set of sequence
+ * @param score similarity score matrix or distance matrix
+ * @param penalty value of penalty for gap
+ */
 class StarMethod(val setOfSeq: List<Sequence>, val score: BLOSUM62, val penalty: Int = 0) {
 
+    /** Distance (score) matrix */
     private val distanceMatrix = Array(setOfSeq.size) { arrayOfNulls<Int>(setOfSeq.size) }
 
+    /** Sum of distance */
     private val sumOfDistance = arrayListOf<Int>()
+
+    /** Center index */
     private var center: Int? = null
 
+    /** Center pairwise alignment */
     private val centerPairwiseAlignment = arrayOfNulls<PairwiseAlignment>(setOfSeq.size)
 
+    /** character for gap */
     private val gap: Char = '-'
 
+    /** Calculate distance */
     private fun calcDistance(): Int {
         // calculate D[i,i]
         calcSameAlignmentDistance()
@@ -34,6 +46,7 @@ class StarMethod(val setOfSeq: List<Sequence>, val score: BLOSUM62, val penalty:
         return center as Int
     }
 
+    /** execute method */
     fun start() {
         calcDistance()
         for (i in setOfSeq.indices) {
@@ -42,8 +55,6 @@ class StarMethod(val setOfSeq: List<Sequence>, val score: BLOSUM62, val penalty:
             search.find()
             val pair = search.getPairwiseAlignment()
             centerPairwiseAlignment[i] = pair
-//            println("%5s: ${pair.alignment2.joinToString("")}".format(setOfSeq[i].name))
-//            println("%5s: ${pair.alignment1.joinToString("")}".format(setOfSeq[center!!].name))
         }
         combinePairwise()
     }
@@ -72,27 +83,38 @@ class StarMethod(val setOfSeq: List<Sequence>, val score: BLOSUM62, val penalty:
             }
             startIndex = maxIndex + 1
             // Fill last gap
-            var maxLength = 0
             if (i == setOfSeq[center!!].length - 1) {
-                // Get max length of center
-                for (j in setOfSeq.indices) {
-                    if (j == center) continue
-                    if (centerPairwiseAlignment[j]?.alignment1?.size!! > maxLength) {
-                        maxLength = centerPairwiseAlignment[j]?.alignment1?.size!!
-                    }
-                }
-                // Fill gap
-                for (j in setOfSeq.indices) {
-                    if (j == center) continue
-                    if (centerPairwiseAlignment[j]?.alignment1?.size!! < maxLength) {
-                        centerPairwiseAlignment[j]?.alignment1?.add(gap)
-                        centerPairwiseAlignment[j]?.alignment2?.add(gap)
-                    }
-                }
+                fillLastGap()
             }
         }
     }
 
+    /** Fill last gaps */
+    private fun fillLastGap() {
+        var maxLength = 0
+        // Get max length of center
+        for (j in setOfSeq.indices) {
+            if (j == center) continue
+            if (centerPairwiseAlignment[j]?.alignment1?.size!! > maxLength) {
+                maxLength = centerPairwiseAlignment[j]?.alignment1?.size!!
+            }
+        }
+        // Fill gap
+        for (j in setOfSeq.indices) {
+            if (j == center) continue
+            if (centerPairwiseAlignment[j]?.alignment1?.size!! < maxLength) {
+                centerPairwiseAlignment[j]?.alignment1?.add(gap)
+                centerPairwiseAlignment[j]?.alignment2?.add(gap)
+            }
+        }
+    }
+
+    /**
+     * Print Results
+     * (center) seq1Name: NR-DP......
+     *          seq2Name: ...........
+     *              :
+     */
     fun getResult() {
         // Print result
         var first = true
@@ -108,6 +130,7 @@ class StarMethod(val setOfSeq: List<Sequence>, val score: BLOSUM62, val penalty:
         }
     }
 
+    /** Calculate D[i,i] */
     private fun calcSameAlignmentDistance() {
         for (i in setOfSeq.indices) {
             val sequence = setOfSeq[i].sequence
@@ -119,6 +142,7 @@ class StarMethod(val setOfSeq: List<Sequence>, val score: BLOSUM62, val penalty:
         }
     }
 
+    /** Print distance (score) matrix */
     fun getDistanceMatrix() {
         println("score matrix:")
         for (i in setOfSeq.indices) {

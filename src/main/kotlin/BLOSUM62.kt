@@ -1,3 +1,8 @@
+/**
+ * Similarity score mtrix BLOSUM62
+ *
+ * @author Yasuaki Yoshii
+ */
 class BLOSUM62 {
     private val map = mapOf('A' to 0,
                     'R' to 1,
